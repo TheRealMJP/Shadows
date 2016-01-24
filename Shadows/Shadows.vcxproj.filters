@@ -1,0 +1,277 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="SampleFramework11\App.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Input.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\PCH.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Timer.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Utility.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Window.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Camera.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\DeviceManager.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\DeviceStates.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\GraphicsTypes.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\ShaderCompilation.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\SpriteFont.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\SpriteRenderer.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Skybox.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Slider.cpp">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\GUIObject.cpp">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\SDKmesh.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Model.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessor.cpp" />
+    <ClCompile Include="SampleFramework11\PostProcessorBase.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp" />
+    <ClCompile Include="SampleFramework11\SH.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Profiler.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\TextGUI.cpp">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Math.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="Shadows.cpp" />
+    <ClCompile Include="SampleFramework11\LodePNG\lodepng.cpp">
+      <Filter>SampleFramework11\LodePNG</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Assert.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\DDSTextureLoader.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\DXErr.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\FileIO.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\MurmurHash.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\WICTextureLoader.cpp">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\Settings.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleFramework11\TwHelper.cpp">
+      <Filter>SampleFramework11</Filter>
+    </ClCompile>
+    <ClCompile Include="AppSettings.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SampleFramework11\App.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Exceptions.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\PCH.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Input.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\InterfacePointers.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Timer.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Utility.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Window.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Camera.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\DeviceStates.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\DeviceManager.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\GraphicsTypes.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\SpriteRenderer.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\ShaderCompilation.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\SpriteFont.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Skybox.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Slider.h">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\GUIObject.h">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\SDKmesh.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Model.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessor.h" />
+    <ClInclude Include="SampleFramework11\PostProcessorBase.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="SampleFramework11\SH.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Profiler.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\TextGUI.h">
+      <Filter>SampleFramework11\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Math.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="Shadows.h" />
+    <ClInclude Include="SampleFramework11\Serialization.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\LodePNG\lodepng.h">
+      <Filter>SampleFramework11\LodePNG</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\Assert.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\DDSTextureLoader.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\DXErr.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\FileIO.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\MurmurHash.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\WICTextureLoader.h">
+      <Filter>SampleFramework11\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SharedConstants.h" />
+    <ClInclude Include="SampleFramework11\Settings.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleFramework11\TwHelper.h">
+      <Filter>SampleFramework11</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSettings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icon.ico" />
+    <None Include="SampleFramework11\Shaders\Sprite.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="SampleFramework11\Shaders\Skybox.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="SampleFramework11\Shaders\Quad.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="SampleFramework11\Shaders\PPIncludes.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="PostProcessing.hlsl" />
+    <None Include="Mesh.hlsl" />
+    <None Include="DepthOnly.hlsl" />
+    <None Include="SampleFramework11\Shaders\Conversion.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="SampleFramework11\Shaders\DecodeTextureCS.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="SampleFramework11\Shaders\SH.hlsl">
+      <Filter>SampleFramework11\Shaders</Filter>
+    </None>
+    <None Include="DepthReduction.hlsl" />
+    <None Include="PCFKernels.hlsl" />
+    <None Include="VSM.hlsl" />
+    <None Include="VSMConvert.hlsl" />
+    <None Include="AppSettings.hlsl" />
+    <None Include="SetupShadows.hlsl" />
+    <None Include="GPUBatch.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="SampleFramework11">
+      <UniqueIdentifier>{2f9c9f9c-5d06-4e89-b1f2-5da3a5a5e932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SampleFramework11\Shaders">
+      <UniqueIdentifier>{9da39173-e6b3-4ca3-af98-9ee3a39a9187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SampleFramework11\Graphics">
+      <UniqueIdentifier>{903f60a9-b7f2-4b72-888a-bbab0823c428}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SampleFramework11\GUI">
+      <UniqueIdentifier>{7618d8f8-2049-4e9c-ae7e-f55810a83e03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SampleFramework11\LodePNG">
+      <UniqueIdentifier>{73e5c512-c3b7-46b3-8bc5-6d32387f4e8d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Shadows.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="AppSettings.cs" />
+    <CustomBuild Include="..\Externals\AntTweakBar\bin\AntTweakBar64.dll" />
+    <CustomBuild Include="..\Externals\d3dcompiler_46.dll" />
+  </ItemGroup>
+</Project>
