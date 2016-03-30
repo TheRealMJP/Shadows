@@ -116,8 +116,8 @@ void ShadowsApp::Initialize()
 
     ID3D11DeviceContext* context = deviceManager.ImmediateContext();
 
-    Float4x4 meshWorld = Float4x4::ScaleMatrix(MeshScales[AppSettings::CurrentScene]);
-    meshRenderer.SetSceneMesh(context, &models[AppSettings::CurrentScene], meshWorld);
+    Float4x4 meshWorld = Float4x4::ScaleMatrix(MeshScales[(int)AppSettings::CurrentScene]);
+    meshRenderer.SetSceneMesh(context, &models[(int)AppSettings::CurrentScene], meshWorld);
 
     Float4x4 characterWorld = Float4x4::ScaleMatrix(CharacterScale);
     Float4x4 characterOrientation = Quaternion::ToFloat4x4(AppSettings::CharacterOrientation);

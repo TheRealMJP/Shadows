@@ -11,19 +11,19 @@
 // Constant buffers
 //=================================================================================================
 
-cbuffer VSConstants : register (cb0)
+cbuffer VSConstants : register (b0)
 {
     float4x4 View : packoffset(c0);
     float4x4 Projection : packoffset(c4);
     float3 Bias : packoffset(c8);
 }
 
-cbuffer GSConstants : register(cb0)
+cbuffer GSConstants : register(b0)
 {
   uint RTIndex : packoffset(c0);
 }
 
-cbuffer PSConstants : register (cb0)
+cbuffer PSConstants : register (b0)
 {
     float3 SunDirection : packoffset(c0);
   uint EnableSun : packoffset(c1);
