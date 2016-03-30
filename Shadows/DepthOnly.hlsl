@@ -11,7 +11,7 @@
 // ================================================================================================
 // Constant buffers
 // ================================================================================================
-cbuffer VSConstants : register(cb0)
+cbuffer VSConstants : register(b0)
 {
     float4x4 World;
     float4x4 ViewProjection;
