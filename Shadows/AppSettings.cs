@@ -114,6 +114,15 @@ enum ShadowAnisotropy
     Anisotropy16x,
 };
 
+enum CascadeSelectionModes
+{
+    [EnumLabel("Split Depth")]
+    SplitDepth = 0,
+
+    [EnumLabel("Projection")]
+    Projection,
+};
+
 public class Settings
 {
     public class SceneControls
@@ -150,29 +159,8 @@ public class Settings
         bool EnableAlbedoMap = true;
     }
 
-    public class Shadows
+    public class CascadeControls
     {
-        [DisplayName("Shadow Mode")]
-        [HelpText("The shadow mapping technique to use")]
-        [UseAsShaderConstant(false)]
-        ShadowMode ShadowMode = ShadowMode.FixedSizePCF;
-
-        [DisplayName("Shadow Map Size")]
-        [HelpText("The size of the shadow map")]
-        ShadowMapSize ShadowMapSize = ShadowMapSize.SMSize2048;
-
-        [DisplayName("Fixed Filter Size")]
-        [HelpText("Size of the PCF kernel used for Fixed Sized PCF shadow mode")]
-        [UseAsShaderConstant(false)]
-        FixedFilterSize FixedFilterSize = FixedFilterSize.Filter2x2;
-
-        [DisplayName("Filter Size")]
-        [MinValue(0.0f)]
-        [MaxValue(100.0f)]
-        [StepSize(0.1f)]
-        [HelpText("Width of the filter kernel used for PCF or VSM filtering")]
-        float FilterSize = 0.0f;
-
         [DisplayName("Visualize Cascades")]
         [HelpText("Colors each cascade a different color to visualize their start and end points")]
         [UseAsShaderConstant(false)]
@@ -188,17 +176,6 @@ public class Settings
         [HelpText("Enables blending across cascade boundaries to reduce the appearance of seams")]
         [UseAsShaderConstant(false)]
         bool FilterAcrossCascades = false;
-
-        [DisplayName("Randomize Disc Offsets")]
-        [HelpText("Applies a per-pixel random rotation to the sample locations when using disc PCF")]
-        [UseAsShaderConstant(false)]
-        bool RandomizeDiscOffsets = false;
-
-        [DisplayName("Num Disc Samples")]
-        [MinValue(1)]
-        [MaxValue(64)]
-        [HelpText("Number of samples to take when using randomized disc PCF")]
-        int NumDiscSamples = 16;
 
         [DisplayName("Auto-Compute Depth Bounds")]
         [HelpText("Automatically fits the cascades to the min and max depth of the scene " +
@@ -271,6 +248,46 @@ public class Settings
         [MaxValue(1.0f)]
         [StepSize(0.01f)]
         float PSSMLambda = 1.0f;
+
+        [DisplayName("Cascade Selection Mode")]
+        [HelpText("Controls how cascades are selected per-pixel in the shader")]
+        [UseAsShaderConstant(false)]
+        CascadeSelectionModes CascadeSelectionMode = CascadeSelectionModes.SplitDepth;
+    }
+
+    public class Shadows
+    {
+        [DisplayName("Shadow Mode")]
+        [HelpText("The shadow mapping technique to use")]
+        [UseAsShaderConstant(false)]
+        ShadowMode ShadowMode = ShadowMode.FixedSizePCF;
+
+        [DisplayName("Shadow Map Size")]
+        [HelpText("The size of the shadow map")]
+        ShadowMapSize ShadowMapSize = ShadowMapSize.SMSize2048;
+
+        [DisplayName("Fixed Filter Size")]
+        [HelpText("Size of the PCF kernel used for Fixed Sized PCF shadow mode")]
+        [UseAsShaderConstant(false)]
+        FixedFilterSize FixedFilterSize = FixedFilterSize.Filter2x2;
+
+        [DisplayName("Filter Size")]
+        [MinValue(0.0f)]
+        [MaxValue(100.0f)]
+        [StepSize(0.1f)]
+        [HelpText("Width of the filter kernel used for PCF or VSM filtering")]
+        float FilterSize = 0.0f;
+
+        [DisplayName("Randomize Disc Offsets")]
+        [HelpText("Applies a per-pixel random rotation to the sample locations when using disc PCF")]
+        [UseAsShaderConstant(false)]
+        bool RandomizeDiscOffsets = false;
+
+        [DisplayName("Num Disc Samples")]
+        [MinValue(1)]
+        [MaxValue(64)]
+        [HelpText("Number of samples to take when using randomized disc PCF")]
+        int NumDiscSamples = 16;
 
         [DisplayName("Use Receiver Plane Depth Bias")]
         [HelpText("Automatically computes a bias value based on the slope of the receiver")]

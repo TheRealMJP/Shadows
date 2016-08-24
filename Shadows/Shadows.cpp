@@ -61,11 +61,7 @@ static const Float3 CharacterPos = Float3(25.0f, 0.0f, 3.0f);
 ShadowsApp::ShadowsApp() :  App(L"Shadows", MAKEINTRESOURCEW(IDI_ICON1)),
                                 camera(WindowWidthF / WindowHeightF, XM_PIDIV4 * 0.75f, NearClip, FarClip)
 {
-    deviceManager.SetBackBufferWidth(WindowWidth);
-    deviceManager.SetBackBufferHeight(WindowHeight);
     deviceManager.SetMinFeatureLevel(D3D_FEATURE_LEVEL_11_0);
-
-    window.SetClientArea(WindowWidth, WindowHeight);
 }
 
 void ShadowsApp::BeforeReset()

@@ -48,6 +48,7 @@ void App::Run()
         FILE* consoleFile = nullptr;
         freopen_s(&consoleFile, "CONOUT$", "wb", stdout);
 
+        window.SetClientArea(deviceManager.BackBufferWidth(), deviceManager.BackBufferHeight());
         window.ShowWindow();
 
         deviceManager.Initialize(window);

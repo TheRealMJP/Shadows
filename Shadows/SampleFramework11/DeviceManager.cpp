@@ -39,6 +39,28 @@ DeviceManager::DeviceManager()  :  backBufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM_S
 {
     refreshRate.Numerator = 60;
     refreshRate.Denominator = 1;
+
+    // Try to figure out if we should default to 1280x720 or 1920x1080
+    POINT point;
+    point.x = 0;
+    point.y = 0;
+    HMONITOR monitor = MonitorFromPoint(point, MONITOR_DEFAULTTOPRIMARY);
+    if(monitor != 0)
+    {
+        MONITORINFOEX info;
+        ZeroMemory(&info, sizeof(info));
+        info.cbSize = sizeof(MONITORINFOEX);
+        if(GetMonitorInfo(monitor, &info) != 0)
+        {
+            int32 width = info.rcWork.right - info.rcWork.left;
+            int32 height = info.rcWork.bottom - info.rcWork.top;
+            if(width > 1920 && height > 1080)
+            {
+                backBufferWidth = 1920;
+                backBufferHeight = 1080;
+            }
+        }
+    }
 }
 
 DeviceManager::~DeviceManager()

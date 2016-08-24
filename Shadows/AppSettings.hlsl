@@ -3,10 +3,7 @@ cbuffer AppSettings : register(b7)
     float3 LightDirection;
     float3 LightColor;
     bool EnableAlbedoMap;
-    int ShadowMapSize;
-    float FilterSize;
     bool StabilizeCascades;
-    int NumDiscSamples;
     bool AutoComputeDepthBounds;
     float MinCascadeDistance;
     float MaxCascadeDistance;
@@ -16,6 +13,9 @@ cbuffer AppSettings : register(b7)
     float SplitDistance2;
     float SplitDistance3;
     float PSSMLambda;
+    int ShadowMapSize;
+    float FilterSize;
+    int NumDiscSamples;
     float Bias;
     float VSMBias;
     float OffsetScale;
@@ -36,6 +36,13 @@ static const int Scene_PowerPlant = 0;
 static const int Scene_Tower = 1;
 static const int Scene_Columns = 2;
 
+static const int PartitionMode_Manual = 0;
+static const int PartitionMode_Logarithmic = 1;
+static const int PartitionMode_PSSM = 2;
+
+static const int CascadeSelectionModes_SplitDepth = 0;
+static const int CascadeSelectionModes_Projection = 1;
+
 static const int ShadowMode_FixedSizePCF = 0;
 static const int ShadowMode_GridPCF = 1;
 static const int ShadowMode_RandomDiscPCF = 2;
@@ -55,10 +62,6 @@ static const int FixedFilterSize_Filter3x3 = 1;
 static const int FixedFilterSize_Filter5x5 = 2;
 static const int FixedFilterSize_Filter7x7 = 3;
 static const int FixedFilterSize_Filter9x9 = 4;
-
-static const int PartitionMode_Manual = 0;
-static const int PartitionMode_Logarithmic = 1;
-static const int PartitionMode_PSSM = 2;
 
 static const int ShadowMSAA_MSAANone = 0;
 static const int ShadowMSAA_MSAA2x = 1;

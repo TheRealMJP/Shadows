@@ -10,6 +10,19 @@ static const char* SceneLabels[3] =
     "Columns",
 };
 
+static const char* PartitionModeLabels[3] =
+{
+    "Manual",
+    "Logarithmic",
+    "PSSM",
+};
+
+static const char* CascadeSelectionModesLabels[2] =
+{
+    "Split Depth",
+    "Projection",
+};
+
 static const char* ShadowModeLabels[9] =
 {
     "Fixed Size PCF",
@@ -37,13 +50,6 @@ static const char* FixedFilterSizeLabels[5] =
     "5x5",
     "7x7",
     "9x9",
-};
-
-static const char* PartitionModeLabels[3] =
-{
-    "Manual",
-    "Logarithmic",
-    "PSSM",
 };
 
 static const char* ShadowMSAALabels[4] =
@@ -77,15 +83,9 @@ namespace AppSettings
     ColorSetting LightColor;
     OrientationSetting CharacterOrientation;
     BoolSetting EnableAlbedoMap;
-    ShadowModeSetting ShadowMode;
-    ShadowMapSizeSetting ShadowMapSize;
-    FixedFilterSizeSetting FixedFilterSize;
-    FloatSetting FilterSize;
     BoolSetting VisualizeCascades;
     BoolSetting StabilizeCascades;
     BoolSetting FilterAcrossCascades;
-    BoolSetting RandomizeDiscOffsets;
-    IntSetting NumDiscSamples;
     BoolSetting AutoComputeDepthBounds;
     IntSetting ReadbackLatency;
     BoolSetting GPUSceneSubmission;
@@ -97,6 +97,13 @@ namespace AppSettings
     FloatSetting SplitDistance2;
     FloatSetting SplitDistance3;
     FloatSetting PSSMLambda;
+    CascadeSelectionModesSetting CascadeSelectionMode;
+    ShadowModeSetting ShadowMode;
+    ShadowMapSizeSetting ShadowMapSize;
+    FixedFilterSizeSetting FixedFilterSize;
+    FloatSetting FilterSize;
+    BoolSetting RandomizeDiscOffsets;
+    IntSetting NumDiscSamples;
     BoolSetting UsePlaneDepthBias;
     FloatSetting Bias;
     FloatSetting VSMBias;
@@ -140,6 +147,51 @@ namespace AppSettings
         EnableAlbedoMap.Initialize(tweakBar, "EnableAlbedoMap", "SceneControls", "Enable Albedo Map", "Enables using albedo maps when rendering the scene", true);
         Settings.AddSetting(&EnableAlbedoMap);
 
+        VisualizeCascades.Initialize(tweakBar, "VisualizeCascades", "CascadeControls", "Visualize Cascades", "Colors each cascade a different color to visualize their start and end points", false);
+        Settings.AddSetting(&VisualizeCascades);
+
+        StabilizeCascades.Initialize(tweakBar, "StabilizeCascades", "CascadeControls", "Stabilize Cascades", "Keeps consistent sizes for each cascade, and snaps each cascade so that they move in texel-sized increments. Reduces temporal aliasing artifacts, but reduces the effective resolution of the cascades", false);
+        Settings.AddSetting(&StabilizeCascades);
+
+        FilterAcrossCascades.Initialize(tweakBar, "FilterAcrossCascades", "CascadeControls", "Filter Across Cascades", "Enables blending across cascade boundaries to reduce the appearance of seams", false);
+        Settings.AddSetting(&FilterAcrossCascades);
+
+        AutoComputeDepthBounds.Initialize(tweakBar, "AutoComputeDepthBounds", "CascadeControls", "Auto-Compute Depth Bounds", "Automatically fits the cascades to the min and max depth of the scene based on the contents of the depth buffer", false);
+        Settings.AddSetting(&AutoComputeDepthBounds);
+
+        ReadbackLatency.Initialize(tweakBar, "ReadbackLatency", "CascadeControls", "Depth Bounds Readback Latency", "Number of frames to wait before reading back the depth reduction results", 1, 0, 3);
+        Settings.AddSetting(&ReadbackLatency);
+
+        GPUSceneSubmission.Initialize(tweakBar, "GPUSceneSubmission", "CascadeControls", "GPU Scene Submission", "Uses compute shaders to handle shadow setup and mesh batching to minimize draw calls and avoid depth readback latency", false);
+        Settings.AddSetting(&GPUSceneSubmission);
+
+        MinCascadeDistance.Initialize(tweakBar, "MinCascadeDistance", "CascadeControls", "Min Cascade Distance", "The closest depth that is covered by the shadow cascades", 0.0000f, 0.0000f, 0.1000f, 0.0010f);
+        Settings.AddSetting(&MinCascadeDistance);
+
+        MaxCascadeDistance.Initialize(tweakBar, "MaxCascadeDistance", "CascadeControls", "Max Cascade Distance", "The furthest depth that is covered by the shadow cascades", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&MaxCascadeDistance);
+
+        PartitionMode.Initialize(tweakBar, "PartitionMode", "CascadeControls", "CSM Partition Model", "Controls how the viewable depth range is partitioned into cascades", PartitionMode::Manual, 3, PartitionModeLabels);
+        Settings.AddSetting(&PartitionMode);
+
+        SplitDistance0.Initialize(tweakBar, "SplitDistance0", "CascadeControls", "Split Distance 0", "Normalized distance to the end of the first cascade split", 0.0500f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&SplitDistance0);
+
+        SplitDistance1.Initialize(tweakBar, "SplitDistance1", "CascadeControls", "Split Distance 1", "Normalized distance to the end of the first cascade split", 0.1500f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&SplitDistance1);
+
+        SplitDistance2.Initialize(tweakBar, "SplitDistance2", "CascadeControls", "Split Distance 2", "Normalized distance to the end of the first cascade split", 0.5000f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&SplitDistance2);
+
+        SplitDistance3.Initialize(tweakBar, "SplitDistance3", "CascadeControls", "Split Distance 3", "Normalized distance to the end of the first cascade split", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&SplitDistance3);
+
+        PSSMLambda.Initialize(tweakBar, "PSSMLambda", "CascadeControls", "PSSM Lambda", "Lambda parameter used when PSSM mode is used for generated, blends between a linear and a logarithmic distribution", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
+        Settings.AddSetting(&PSSMLambda);
+
+        CascadeSelectionMode.Initialize(tweakBar, "CascadeSelectionMode", "CascadeControls", "Cascade Selection Mode", "Controls how cascades are selected per-pixel in the shader", CascadeSelectionModes::SplitDepth, 2, CascadeSelectionModesLabels);
+        Settings.AddSetting(&CascadeSelectionMode);
+
         ShadowMode.Initialize(tweakBar, "ShadowMode", "Shadows", "Shadow Mode", "The shadow mapping technique to use", ShadowMode::FixedSizePCF, 9, ShadowModeLabels);
         Settings.AddSetting(&ShadowMode);
 
@@ -152,53 +204,11 @@ namespace AppSettings
         FilterSize.Initialize(tweakBar, "FilterSize", "Shadows", "Filter Size", "Width of the filter kernel used for PCF or VSM filtering", 0.0000f, 0.0000f, 100.0000f, 0.1000f);
         Settings.AddSetting(&FilterSize);
 
-        VisualizeCascades.Initialize(tweakBar, "VisualizeCascades", "Shadows", "Visualize Cascades", "Colors each cascade a different color to visualize their start and end points", false);
-        Settings.AddSetting(&VisualizeCascades);
-
-        StabilizeCascades.Initialize(tweakBar, "StabilizeCascades", "Shadows", "Stabilize Cascades", "Keeps consistent sizes for each cascade, and snaps each cascade so that they move in texel-sized increments. Reduces temporal aliasing artifacts, but reduces the effective resolution of the cascades", false);
-        Settings.AddSetting(&StabilizeCascades);
-
-        FilterAcrossCascades.Initialize(tweakBar, "FilterAcrossCascades", "Shadows", "Filter Across Cascades", "Enables blending across cascade boundaries to reduce the appearance of seams", false);
-        Settings.AddSetting(&FilterAcrossCascades);
-
         RandomizeDiscOffsets.Initialize(tweakBar, "RandomizeDiscOffsets", "Shadows", "Randomize Disc Offsets", "Applies a per-pixel random rotation to the sample locations when using disc PCF", false);
         Settings.AddSetting(&RandomizeDiscOffsets);
 
         NumDiscSamples.Initialize(tweakBar, "NumDiscSamples", "Shadows", "Num Disc Samples", "Number of samples to take when using randomized disc PCF", 16, 1, 64);
         Settings.AddSetting(&NumDiscSamples);
-
-        AutoComputeDepthBounds.Initialize(tweakBar, "AutoComputeDepthBounds", "Shadows", "Auto-Compute Depth Bounds", "Automatically fits the cascades to the min and max depth of the scene based on the contents of the depth buffer", false);
-        Settings.AddSetting(&AutoComputeDepthBounds);
-
-        ReadbackLatency.Initialize(tweakBar, "ReadbackLatency", "Shadows", "Depth Bounds Readback Latency", "Number of frames to wait before reading back the depth reduction results", 1, 0, 3);
-        Settings.AddSetting(&ReadbackLatency);
-
-        GPUSceneSubmission.Initialize(tweakBar, "GPUSceneSubmission", "Shadows", "GPU Scene Submission", "Uses compute shaders to handle shadow setup and mesh batching to minimize draw calls and avoid depth readback latency", false);
-        Settings.AddSetting(&GPUSceneSubmission);
-
-        MinCascadeDistance.Initialize(tweakBar, "MinCascadeDistance", "Shadows", "Min Cascade Distance", "The closest depth that is covered by the shadow cascades", 0.0000f, 0.0000f, 0.1000f, 0.0010f);
-        Settings.AddSetting(&MinCascadeDistance);
-
-        MaxCascadeDistance.Initialize(tweakBar, "MaxCascadeDistance", "Shadows", "Max Cascade Distance", "The furthest depth that is covered by the shadow cascades", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&MaxCascadeDistance);
-
-        PartitionMode.Initialize(tweakBar, "PartitionMode", "Shadows", "CSM Partition Model", "Controls how the viewable depth range is partitioned into cascades", PartitionMode::Manual, 3, PartitionModeLabels);
-        Settings.AddSetting(&PartitionMode);
-
-        SplitDistance0.Initialize(tweakBar, "SplitDistance0", "Shadows", "Split Distance 0", "Normalized distance to the end of the first cascade split", 0.0500f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&SplitDistance0);
-
-        SplitDistance1.Initialize(tweakBar, "SplitDistance1", "Shadows", "Split Distance 1", "Normalized distance to the end of the first cascade split", 0.1500f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&SplitDistance1);
-
-        SplitDistance2.Initialize(tweakBar, "SplitDistance2", "Shadows", "Split Distance 2", "Normalized distance to the end of the first cascade split", 0.5000f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&SplitDistance2);
-
-        SplitDistance3.Initialize(tweakBar, "SplitDistance3", "Shadows", "Split Distance 3", "Normalized distance to the end of the first cascade split", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&SplitDistance3);
-
-        PSSMLambda.Initialize(tweakBar, "PSSMLambda", "Shadows", "PSSM Lambda", "Lambda parameter used when PSSM mode is used for generated, blends between a linear and a logarithmic distribution", 1.0000f, 0.0000f, 1.0000f, 0.0100f);
-        Settings.AddSetting(&PSSMLambda);
 
         UsePlaneDepthBias.Initialize(tweakBar, "UsePlaneDepthBias", "Shadows", "Use Receiver Plane Depth Bias", "Automatically computes a bias value based on the slope of the receiver", true);
         Settings.AddSetting(&UsePlaneDepthBias);
@@ -262,10 +272,7 @@ namespace AppSettings
         CBuffer.Data.LightDirection = LightDirection;
         CBuffer.Data.LightColor = LightColor;
         CBuffer.Data.EnableAlbedoMap = EnableAlbedoMap;
-        CBuffer.Data.ShadowMapSize = ShadowMapSize;
-        CBuffer.Data.FilterSize = FilterSize;
         CBuffer.Data.StabilizeCascades = StabilizeCascades;
-        CBuffer.Data.NumDiscSamples = NumDiscSamples;
         CBuffer.Data.AutoComputeDepthBounds = AutoComputeDepthBounds;
         CBuffer.Data.MinCascadeDistance = MinCascadeDistance;
         CBuffer.Data.MaxCascadeDistance = MaxCascadeDistance;
@@ -275,6 +282,9 @@ namespace AppSettings
         CBuffer.Data.SplitDistance2 = SplitDistance2;
         CBuffer.Data.SplitDistance3 = SplitDistance3;
         CBuffer.Data.PSSMLambda = PSSMLambda;
+        CBuffer.Data.ShadowMapSize = ShadowMapSize;
+        CBuffer.Data.FilterSize = FilterSize;
+        CBuffer.Data.NumDiscSamples = NumDiscSamples;
         CBuffer.Data.Bias = Bias;
         CBuffer.Data.VSMBias = VSMBias;
         CBuffer.Data.OffsetScale = OffsetScale;

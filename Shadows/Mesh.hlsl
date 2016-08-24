@@ -730,15 +730,27 @@ float3 ShadowVisibility(in float3 positionWS, in float depthVS, in float nDotL, 
                         in uint2 screenPos)
 {
 	float3 shadowVisibility = 1.0f;
-	uint cascadeIdx = 0;
+	uint cascadeIdx = NumCascades - 1;
+    float3 projectionPos = mul(float4(positionWS, 1.0f), ShadowMatrix).xyz;
 
 	// Figure out which cascade to sample from
 	[unroll]
-	for(uint i = 0; i < NumCascades - 1; ++i)
+	for(int i = NumCascades - 1; i >= 0; --i)
 	{
-		[flatten]
-		if(depthVS > CascadeSplits[i])
-			cascadeIdx = i + 1;
+        #if SelectFromProjection_
+            // Select based on whether or not the pixel is inside the projection
+            // used for rendering to the cascade
+            float3 cascadePos = projectionPos + CascadeOffsets[i].xyz;
+            cascadePos *= CascadeScales[i].xyz;
+            cascadePos = abs(cascadePos - 0.5f);
+            if(all(cascadePos <= 0.5f))
+                cascadeIdx = i;
+        #else
+            // Select based on whether or not our view-space depth falls within
+            // the depth range of a cascade split
+            if(depthVS <= CascadeSplits[i])
+                cascadeIdx = i;
+        #endif
 	}
 
     // Apply offset
@@ -757,17 +769,26 @@ float3 ShadowVisibility(in float3 positionWS, in float depthVS, in float nDotL, 
         // Sample the next cascade, and blend between the two results to
         // smooth the transition
         const float BlendThreshold = 0.1f;
+
         float nextSplit = CascadeSplits[cascadeIdx];
         float splitSize = cascadeIdx == 0 ? nextSplit : nextSplit - CascadeSplits[cascadeIdx - 1];
-        float splitDist = (nextSplit - depthVS) / splitSize;
+        float fadeFactor = (nextSplit - depthVS) / splitSize;
+
+        #if SelectFromProjection_
+            float3 cascadePos = projectionPos + CascadeOffsets[cascadeIdx].xyz;
+            cascadePos *= CascadeScales[cascadeIdx].xyz;
+            cascadePos = abs(cascadePos * 2.0f - 1.0f);
+            float distToEdge = 1.0f - max(max(cascadePos.x, cascadePos.y), cascadePos.z);
+            fadeFactor = max(distToEdge, fadeFactor);
+        #endif
 
         [branch]
-        if(splitDist <= BlendThreshold && cascadeIdx != NumCascades - 1)
+        if(fadeFactor <= BlendThreshold && cascadeIdx != NumCascades - 1)
         {
             float3 nextSplitVisibility = SampleShadowCascade(shadowPosition, shadowPosDX,
                                                              shadowPosDY, cascadeIdx + 1,
                                                              screenPos);
-            float lerpAmt = smoothstep(0.0f, BlendThreshold, splitDist);
+            float lerpAmt = smoothstep(0.0f, BlendThreshold, fadeFactor);
             shadowVisibility = lerp(nextSplitVisibility, shadowVisibility, lerpAmt);
         }
     #endif

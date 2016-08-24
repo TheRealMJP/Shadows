@@ -17,6 +17,27 @@ enum class Scene
 
 typedef EnumSettingT<Scene> SceneSetting;
 
+enum class PartitionMode
+{
+    Manual = 0,
+    Logarithmic = 1,
+    PSSM = 2,
+
+    NumValues
+};
+
+typedef EnumSettingT<PartitionMode> PartitionModeSetting;
+
+enum class CascadeSelectionModes
+{
+    SplitDepth = 0,
+    Projection = 1,
+
+    NumValues
+};
+
+typedef EnumSettingT<CascadeSelectionModes> CascadeSelectionModesSetting;
+
 enum class ShadowMode
 {
     FixedSizePCF = 0,
@@ -57,17 +78,6 @@ enum class FixedFilterSize
 };
 
 typedef EnumSettingT<FixedFilterSize> FixedFilterSizeSetting;
-
-enum class PartitionMode
-{
-    Manual = 0,
-    Logarithmic = 1,
-    PSSM = 2,
-
-    NumValues
-};
-
-typedef EnumSettingT<PartitionMode> PartitionModeSetting;
 
 enum class ShadowMSAA
 {
@@ -112,15 +122,9 @@ namespace AppSettings
     extern ColorSetting LightColor;
     extern OrientationSetting CharacterOrientation;
     extern BoolSetting EnableAlbedoMap;
-    extern ShadowModeSetting ShadowMode;
-    extern ShadowMapSizeSetting ShadowMapSize;
-    extern FixedFilterSizeSetting FixedFilterSize;
-    extern FloatSetting FilterSize;
     extern BoolSetting VisualizeCascades;
     extern BoolSetting StabilizeCascades;
     extern BoolSetting FilterAcrossCascades;
-    extern BoolSetting RandomizeDiscOffsets;
-    extern IntSetting NumDiscSamples;
     extern BoolSetting AutoComputeDepthBounds;
     extern IntSetting ReadbackLatency;
     extern BoolSetting GPUSceneSubmission;
@@ -132,6 +136,13 @@ namespace AppSettings
     extern FloatSetting SplitDistance2;
     extern FloatSetting SplitDistance3;
     extern FloatSetting PSSMLambda;
+    extern CascadeSelectionModesSetting CascadeSelectionMode;
+    extern ShadowModeSetting ShadowMode;
+    extern ShadowMapSizeSetting ShadowMapSize;
+    extern FixedFilterSizeSetting FixedFilterSize;
+    extern FloatSetting FilterSize;
+    extern BoolSetting RandomizeDiscOffsets;
+    extern IntSetting NumDiscSamples;
     extern BoolSetting UsePlaneDepthBias;
     extern FloatSetting Bias;
     extern FloatSetting VSMBias;
@@ -156,10 +167,7 @@ namespace AppSettings
         Float3 LightDirection;
         Float4Align Float3 LightColor;
         bool32 EnableAlbedoMap;
-        int32 ShadowMapSize;
-        float FilterSize;
         bool32 StabilizeCascades;
-        int32 NumDiscSamples;
         bool32 AutoComputeDepthBounds;
         float MinCascadeDistance;
         float MaxCascadeDistance;
@@ -169,6 +177,9 @@ namespace AppSettings
         float SplitDistance2;
         float SplitDistance3;
         float PSSMLambda;
+        int32 ShadowMapSize;
+        float FilterSize;
+        int32 NumDiscSamples;
         float Bias;
         float VSMBias;
         float OffsetScale;

@@ -311,6 +311,7 @@ static PixelShaderPtr CompileMeshPS(ID3D11Device* device)
     opts.Add("FilterSize_", AppSettings::FixedFilterKernelSize());
     opts.Add("ShadowMode_", uint32(AppSettings::ShadowMode));
     opts.Add("RandomizeOffsets_", AppSettings::RandomizeDiscOffsets);
+    opts.Add("SelectFromProjection_", AppSettings::CascadeSelectionMode == CascadeSelectionModes::Projection ? 1 : 0);
     return CompilePSFromFile(device, L"Mesh.hlsl", "PS", "ps_5_0", opts);
 }
 
@@ -659,7 +660,8 @@ void MeshRenderer::Update()
 
     if(AppSettings::VisualizeCascades.Changed() || AppSettings::UsePlaneDepthBias.Changed()
        || AppSettings::FilterAcrossCascades.Changed() || AppSettings::FixedFilterSize.Changed()
-       || AppSettings::ShadowMode.Changed() || AppSettings::RandomizeDiscOffsets.Changed())
+       || AppSettings::ShadowMode.Changed() || AppSettings::RandomizeDiscOffsets.Changed()
+       || AppSettings::CascadeSelectionMode.Changed())
         meshPS = CompileMeshPS(device);
 
     if(AppSettings::AutoComputeDepthBounds && AppSettings::GPUSceneSubmission == false)
