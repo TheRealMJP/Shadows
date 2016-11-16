@@ -123,6 +123,18 @@ enum CascadeSelectionModes
     Projection,
 };
 
+enum DepthBufferFormats
+{
+    [EnumLabel("16-bit UNORM")]
+    DB16Unorm = 0,
+
+    [EnumLabel("24-bit UNORM")]
+    DB24Unorm,
+
+    [EnumLabel("32-bit FLOAT")]
+    DB32Float,
+}
+
 public class Settings
 {
     public class SceneControls
@@ -265,6 +277,10 @@ public class Settings
         [DisplayName("Shadow Map Size")]
         [HelpText("The size of the shadow map")]
         ShadowMapSize ShadowMapSize = ShadowMapSize.SMSize2048;
+
+        [DisplayName("Depth Buffer Format")]
+        [HelpText("The surface format used for the shadow depth buffer")]
+        DepthBufferFormats DepthBufferFormat = DepthBufferFormats.DB32Float;
 
         [DisplayName("Fixed Filter Size")]
         [HelpText("Size of the PCF kernel used for Fixed Sized PCF shadow mode")]

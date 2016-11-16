@@ -43,6 +43,13 @@ static const char* ShadowMapSizeLabels[3] =
     "2048x2048",
 };
 
+static const char* DepthBufferFormatsLabels[3] =
+{
+    "16-bit UNORM",
+    "24-bit UNORM",
+    "32-bit FLOAT",
+};
+
 static const char* FixedFilterSizeLabels[5] =
 {
     "2x2",
@@ -100,6 +107,7 @@ namespace AppSettings
     CascadeSelectionModesSetting CascadeSelectionMode;
     ShadowModeSetting ShadowMode;
     ShadowMapSizeSetting ShadowMapSize;
+    DepthBufferFormatsSetting DepthBufferFormat;
     FixedFilterSizeSetting FixedFilterSize;
     FloatSetting FilterSize;
     BoolSetting RandomizeDiscOffsets;
@@ -198,6 +206,9 @@ namespace AppSettings
         ShadowMapSize.Initialize(tweakBar, "ShadowMapSize", "Shadows", "Shadow Map Size", "The size of the shadow map", ShadowMapSize::SMSize2048, 3, ShadowMapSizeLabels);
         Settings.AddSetting(&ShadowMapSize);
 
+        DepthBufferFormat.Initialize(tweakBar, "DepthBufferFormat", "Shadows", "Depth Buffer Format", "The surface format used for the shadow depth buffer", DepthBufferFormats::DB32Float, 3, DepthBufferFormatsLabels);
+        Settings.AddSetting(&DepthBufferFormat);
+
         FixedFilterSize.Initialize(tweakBar, "FixedFilterSize", "Shadows", "Fixed Filter Size", "Size of the PCF kernel used for Fixed Sized PCF shadow mode", FixedFilterSize::Filter2x2, 5, FixedFilterSizeLabels);
         Settings.AddSetting(&FixedFilterSize);
 
@@ -283,6 +294,7 @@ namespace AppSettings
         CBuffer.Data.SplitDistance3 = SplitDistance3;
         CBuffer.Data.PSSMLambda = PSSMLambda;
         CBuffer.Data.ShadowMapSize = ShadowMapSize;
+        CBuffer.Data.DepthBufferFormat = DepthBufferFormat;
         CBuffer.Data.FilterSize = FilterSize;
         CBuffer.Data.NumDiscSamples = NumDiscSamples;
         CBuffer.Data.Bias = Bias;

@@ -66,6 +66,17 @@ enum class ShadowMapSize
 
 typedef EnumSettingT<ShadowMapSize> ShadowMapSizeSetting;
 
+enum class DepthBufferFormats
+{
+    DB16Unorm = 0,
+    DB24Unorm = 1,
+    DB32Float = 2,
+
+    NumValues
+};
+
+typedef EnumSettingT<DepthBufferFormats> DepthBufferFormatsSetting;
+
 enum class FixedFilterSize
 {
     Filter2x2 = 0,
@@ -139,6 +150,7 @@ namespace AppSettings
     extern CascadeSelectionModesSetting CascadeSelectionMode;
     extern ShadowModeSetting ShadowMode;
     extern ShadowMapSizeSetting ShadowMapSize;
+    extern DepthBufferFormatsSetting DepthBufferFormat;
     extern FixedFilterSizeSetting FixedFilterSize;
     extern FloatSetting FilterSize;
     extern BoolSetting RandomizeDiscOffsets;
@@ -178,6 +190,7 @@ namespace AppSettings
         float SplitDistance3;
         float PSSMLambda;
         int32 ShadowMapSize;
+        int32 DepthBufferFormat;
         float FilterSize;
         int32 NumDiscSamples;
         float Bias;

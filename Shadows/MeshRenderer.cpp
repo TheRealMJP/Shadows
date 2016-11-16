@@ -396,10 +396,16 @@ void MeshRenderer::CreateShadowMaps()
     // Create the shadow map as a texture atlas
     const uint32 ShadowMapSize = AppSettings::ShadowMapResolution();
 
+    DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
+    if(AppSettings::DepthBufferFormat == DepthBufferFormats::DB16Unorm)
+        depthFormat = DXGI_FORMAT_D16_UNORM;
+    else if(AppSettings::DepthBufferFormat == DepthBufferFormats::DB24Unorm)
+        depthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
     if(AppSettings::UseFilterableShadows())
     {
         uint32 msaaSamples = AppSettings::MSAASamples();
-        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, DXGI_FORMAT_D32_FLOAT, true, msaaSamples, 0, 1);
+        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, depthFormat, true, msaaSamples, 0, 1);
 
         DXGI_FORMAT smFmt;
         if(AppSettings::ShadowMode == ShadowMode::EVSM4)
@@ -439,7 +445,7 @@ void MeshRenderer::CreateShadowMaps()
     }
     else
     {
-        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, DXGI_FORMAT_D32_FLOAT, true, 1, 0, NumCascades);
+        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, depthFormat, true, 1, 0, NumCascades);
         varianceShadowMap = RenderTarget2D();
     }
 }
@@ -655,7 +661,7 @@ void MeshRenderer::Update()
 {
     if(AppSettings::ShadowMapSize.Changed() || AppSettings::ShadowMode.Changed()
         || AppSettings::ShadowMSAA.Changed() || AppSettings::SMFormat.Changed()
-        || AppSettings::EnableShadowMips.Changed())
+        || AppSettings::EnableShadowMips.Changed() || AppSettings::DepthBufferFormat.Changed())
         CreateShadowMaps();
 
     if(AppSettings::VisualizeCascades.Changed() || AppSettings::UsePlaneDepthBias.Changed()
