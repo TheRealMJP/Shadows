@@ -17,4 +17,4 @@ This code sample was done as part of 2 articles for my blog, which you can find 
 
 # Build Instructions
 
-The repository contains a Visual Studio 2012 project and solution file that's ready to build and run on Windows 7, 8, or 10. All external dependencies are included in the repository.
+The repository contains a Visual Studio 2015 project and solution file that's ready to build and run on Windows 7, 8, or 10. All external dependencies are included in the repository.
