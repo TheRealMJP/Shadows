@@ -28,11 +28,11 @@ static const uint NumThreads = ReductionTGSize * ReductionTGSize;
     Texture2D<float> DepthMap : register(t0);
 #endif
 
-Texture2D<float2> ReductionMap : register(t0);
+Texture2D<unorm float2> ReductionMap : register(t0);
 
 SamplerState LinearClampSampler : register(s0);
 
-RWTexture2D<float2> OutputMap : register(u0);
+RWTexture2D<unorm float2> OutputMap : register(u0);
 
 cbuffer ReductionConstants : register(b0)
 {
