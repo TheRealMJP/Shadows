@@ -324,7 +324,7 @@ public class Settings
         [StepSize(0.001f)]
         float VSMBias = 0.01f;
 
-        [DisplayName("Offset Scale")]
+        [DisplayName("Normal Offset Scale")]
         [HelpText("Shadow receiver offset along the surface normal direction")]
         [MinValue(0.0f)]
         [MaxValue(100.0f)]

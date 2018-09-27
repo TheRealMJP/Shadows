@@ -230,7 +230,7 @@ namespace AppSettings
         VSMBias.Initialize(tweakBar, "VSMBias", "Shadows", "VSM Bias (x100)", "Bias used for VSM evaluation", 0.0100f, 0.0000f, 100.0000f, 0.0010f);
         Settings.AddSetting(&VSMBias);
 
-        OffsetScale.Initialize(tweakBar, "OffsetScale", "Shadows", "Offset Scale", "Shadow receiver offset along the surface normal direction", 0.0000f, 0.0000f, 100.0000f, 0.1000f);
+        OffsetScale.Initialize(tweakBar, "OffsetScale", "Shadows", "Normal Offset Scale", "Shadow receiver offset along the surface normal direction", 0.0000f, 0.0000f, 100.0000f, 0.1000f);
         Settings.AddSetting(&OffsetScale);
 
         ShadowMSAA.Initialize(tweakBar, "ShadowMSAA", "Shadows", "Shadow MSAA", "MSAA mode to use for VSM or MSM shadow maps", ShadowMSAA::MSAANone, 4, ShadowMSAALabels);

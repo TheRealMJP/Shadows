@@ -785,7 +785,13 @@ float3 ShadowVisibility(in float3 positionWS, in float depthVS, in float nDotL, 
         [branch]
         if(fadeFactor <= BlendThreshold && cascadeIdx != NumCascades - 1)
         {
-            float3 nextSplitVisibility = SampleShadowCascade(shadowPosition, shadowPosDX,
+            // Apply offset
+            float3 nextCascadeOffset = GetShadowPosOffset(nDotL, normal) / abs(CascadeScales[cascadeIdx + 1].z);
+
+            // Project into shadow space
+            float3 nextCascadeShadowPosition = mul(float4(positionWS + nextCascadeOffset, 1.0f), ShadowMatrix).xyz;
+
+            float3 nextSplitVisibility = SampleShadowCascade(nextCascadeShadowPosition, shadowPosDX,
                                                              shadowPosDY, cascadeIdx + 1,
                                                              screenPos);
             float lerpAmt = smoothstep(0.0f, BlendThreshold, fadeFactor);
