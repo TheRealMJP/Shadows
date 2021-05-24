@@ -12,8 +12,8 @@ This is a D3D11 sample app that demonstrates several techniques for rendering re
 
 This code sample was done as part of 2 articles for my blog, which you can find here:
 
-* [https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/](https://mynameismjp.wordpress.com/2013/09/10/shadow-maps/)
-* [https://mynameismjp.wordpress.com/2015/02/18/shadow-sample-update/](https://mynameismjp.wordpress.com/2015/02/18/shadow-sample-update/)
+* [https://therealmjp.github.io/posts/shadow-maps/](https://therealmjp.github.io/posts/shadow-maps/)
+* [https://therealmjp.github.io/posts/shadow-sample-update/](https://therealmjp.github.io/posts/shadow-sample-update/)
 
 # Build Instructions
 
