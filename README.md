@@ -6,9 +6,9 @@ This is a D3D11 sample app that demonstrates several techniques for rendering re
 * Stabilized Cascaded Shadow Maps
 * Automatic Cascade Fitting based on depth buffer analysis, as in [Sample Distribution Shadow Maps](https://software.intel.com/en-us/articles/sample-distribution-shadow-maps).
 * Various forms of Percentage Closer Filtering
-* [Variance Shadow Maps](http://www.punkuser.net/vsm/vsm_paper.pdf)
-* [Exponential Variance Shadow Maps](http://www.punkuser.net/lvsm/lvsm_web.pdf) (EVSM)
-* [Moment Shadow Maps](http://cg.cs.uni-bonn.de/en/publications/paper-details/peters-2015-msm/)
+* [Variance Shadow Maps](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.104.2569&rep=rep1&type=pdf)
+* [Exponential Variance Shadow Maps](https://dl.acm.org/doi/pdf/10.5555/1375714.1375739) (EVSM)
+* [Moment Shadow Maps](https://momentsingraphics.de/I3D2015.html)
 
 This code sample was done as part of 2 articles for my blog, which you can find here:
 
