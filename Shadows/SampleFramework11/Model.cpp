@@ -105,6 +105,8 @@ void Mesh::Initialize(ID3D11Device* device, SDKMesh& sdkMesh, uint32 meshIdx, bo
     indices.resize(indexSize * numIndices, 0);
     memcpy(indices.data(), sdkMesh.GetRawIndicesAt(ibIdx), indexSize * numIndices);
 
+    name = sdkMeshData.Name;
+
     if(generateTangents)
         GenerateTangentFrame();
 
@@ -603,6 +605,7 @@ void Model::CreateFromSDKMeshFile(ID3D11Device* device, LPCWSTR fileName, const 
         material.SpecularPower = mat->Power;
         material.DiffuseMapName = AnsiToWString(mat->DiffuseTexture);
         material.NormalMapName = AnsiToWString(mat->NormalTexture);
+        material.Name = mat->Name;
 
         // Add the normal map prefix
         if (normalMapSuffix && material.DiffuseMapName.length() > 0
@@ -853,6 +856,128 @@ void Model::ReadFromFile(const wchar* path, ID3D11Device* device)
 
     // Close the file
     Win32Call(CloseHandle(fileHandle));
+}
+
+static uint32 VertexElemIndex(const std::vector<D3D11_INPUT_ELEMENT_DESC>& inputElements, const char* semanticName, uint32 semanticIndex)
+{
+    for(uint32 elemIdx = 0; elemIdx < inputElements.size(); ++elemIdx)
+    {
+        const D3D11_INPUT_ELEMENT_DESC& elem = inputElements[elemIdx];
+        if(strcmp(semanticName, elem.SemanticName) == 0 && elem.SemanticIndex == semanticIndex)
+            return elemIdx;
+    }
+
+    return uint32(-1);
+}
+
+void Model::SaveAsOBJ(const wchar* path)
+{
+    {
+        // Save the .mtl file
+        std::wstring mtlPath = GetFilePathWithoutExtension(path) + L".mtl";
+        std::string mtlContents;
+        for(const MeshMaterial& material : meshMaterials)
+        {
+            mtlContents += MakeString("newmtl %s\n", material.Name.c_str());
+            mtlContents += "illum 4\n";
+            mtlContents += MakeString("Kd %f %f %f\n", material.DiffuseAlbedo.x, material.DiffuseAlbedo.y, material.DiffuseAlbedo.z);
+            mtlContents += MakeString("Ka %f %f %f\n", material.AmbientAlbedo.x, material.AmbientAlbedo.y, material.AmbientAlbedo.z);
+            mtlContents += "Tf 1.00 1.00 1.00\n";
+            mtlContents += MakeString("map_Kd %ls\n", material.DiffuseMapName.c_str());
+            if(material.NormalMapName != L"default-normalmap.dds")
+                mtlContents += MakeString("bump %ls\n", material.NormalMapName.c_str());
+            mtlContents += "Ni 1.00\n";
+            mtlContents += MakeString("Ks %f %f %f\n", material.SpecularAlbedo.x, material.SpecularAlbedo.y, material.SpecularAlbedo.z);
+            mtlContents += MakeString("Ns %f\n", material.SpecularPower);
+        }
+
+        WriteStringAsFile(mtlPath.c_str(), mtlContents);
+    }
+
+    {
+        std::string objContents;
+        objContents += "mtllib " + WStringToAnsi(GetFileNameWithoutExtension(path).c_str()) + ".mtl\n";
+
+        // Write out the vertex data first
+        for(const Mesh& mesh : meshes)
+        {
+            const uint32 posIdx = VertexElemIndex(mesh.inputElements, "POSITION", 0);
+            Assert_(posIdx != uint32(-1));
+
+            const D3D11_INPUT_ELEMENT_DESC& posElem = mesh.inputElements[posIdx];
+            Assert_(posElem.Format == DXGI_FORMAT_R32G32B32_FLOAT);
+
+            for(uint32 vtxIdx = 0; vtxIdx < mesh.numVertices; ++vtxIdx)
+            {
+                const Float3* pos = (const Float3*)&mesh.vertices[vtxIdx * mesh.vertexStride + posElem.AlignedByteOffset];
+                objContents += MakeString("v %f %f %f\n", pos->x, pos->y, pos->z);
+            }
+        }
+
+        for(const Mesh& mesh : meshes)
+        {
+            const uint32 uvIdx = VertexElemIndex(mesh.inputElements, "TEXCOORD", 0);
+            Assert_(uvIdx != uint32(-1));
+
+            const D3D11_INPUT_ELEMENT_DESC& uvElem = mesh.inputElements[uvIdx];
+            Assert_(uvElem.Format == DXGI_FORMAT_R32G32_FLOAT);
+
+            for(uint32 vtxIdx = 0; vtxIdx < mesh.numVertices; ++vtxIdx)
+            {
+                const Float2* uv = (const Float2*)&mesh.vertices[vtxIdx * mesh.vertexStride + uvElem.AlignedByteOffset];
+                objContents += MakeString("vt %f %f\n", uv->x, 1.0f - uv->y);
+            }
+        }
+
+        for(const Mesh& mesh : meshes)
+        {
+            const uint32 nmlIdx = VertexElemIndex(mesh.inputElements, "NORMAL", 0);
+            Assert_(nmlIdx != uint32(-1));
+
+            const D3D11_INPUT_ELEMENT_DESC& nmlElem = mesh.inputElements[nmlIdx];
+            Assert_(nmlElem.Format == DXGI_FORMAT_R32G32B32_FLOAT);
+
+            for(uint32 vtxIdx = 0; vtxIdx < mesh.numVertices; ++vtxIdx)
+            {
+                const Float3* nml = (const Float3*)&mesh.vertices[vtxIdx * mesh.vertexStride + nmlElem.AlignedByteOffset];
+                objContents += MakeString("vn %f %f %f\n", nml->x, nml->y, nml->z);
+            }
+        }
+
+        // Write out submesh material + faces
+        uint32 indexOffset = 0;
+        for(const Mesh& mesh : meshes)
+        {
+            for(uint32 meshPartIdx = 0; meshPartIdx < mesh.meshParts.size(); ++meshPartIdx)
+            {
+                const MeshPart& meshPart  = mesh.meshParts[meshPartIdx];
+                objContents += MakeString("g %s_%u\n", mesh.name.c_str(), meshPartIdx);
+                objContents += MakeString("usemtl %s\n", meshMaterials[meshPart.MaterialIdx].Name.c_str());
+
+                const uint16* indices16 = (const uint16*)(mesh.indices.data() + (meshPart.IndexStart * 2));
+                const uint32* indices32 = (const uint32*)(mesh.indices.data() + (meshPart.IndexStart * 4));
+
+                Assert_(meshPart.IndexCount % 3 == 0);
+                const uint32 numTris = meshPart.IndexCount / 3;
+                for(uint32 triIdx = 0; triIdx < numTris; ++triIdx)
+                {
+                    const uint32 idx0 = mesh.indexType == Mesh::Index16Bit ? indices16[triIdx * 3 + 0] : indices32[triIdx * 3 + 0];
+                    const uint32 idx1 = mesh.indexType == Mesh::Index16Bit ? indices16[triIdx * 3 + 1] : indices32[triIdx * 3 + 1];
+                    const uint32 idx2 = mesh.indexType == Mesh::Index16Bit ? indices16[triIdx * 3 + 2] : indices32[triIdx * 3 + 2];
+
+                    const uint32 finalIdx0 = idx0 + indexOffset + 1;
+                    const uint32 finalIdx1 = idx1 + indexOffset + 1;
+                    const uint32 finalIdx2 = idx2 + indexOffset + 1;
+
+                    objContents += MakeString("f %u/%u/%u %u/%u/%u %u/%u/%u\n", finalIdx0, finalIdx0, finalIdx0, finalIdx1, finalIdx1, finalIdx1, finalIdx2, finalIdx2, finalIdx2);
+                }
+            }
+
+            indexOffset += mesh.numVertices;
+        }
+
+        WriteStringAsFile(path, objContents);
+    }
 }
 
 }

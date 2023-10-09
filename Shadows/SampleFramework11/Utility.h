@@ -19,6 +19,8 @@
 namespace SampleFramework11
 {
 
+#define ArraySize_(x) ((sizeof(x) / sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
 // Returns a size suitable for creating a constant buffer, by rounding up
 // to the next multiple of 16
 inline UINT CBSize(UINT size)
@@ -99,6 +101,9 @@ template<typename T> inline std::string ToAnsiString(const T& val)
         throw Exception(L"Error converting value to string");
     return stream.str();
 }
+
+std::wstring MakeString(const wchar* format, ...);
+std::string MakeString(const char* format, ...);
 
 // Outputs a string to the debugger output
 inline void DebugPrint(const std::wstring& str)

@@ -105,6 +105,8 @@ void ShadowsApp::Initialize()
         models[i].CreateFromSDKMeshFile(device, path.c_str());
     }
 
+    // models[0].SaveAsOBJ(L"..\\Content\\Models\\Powerplant\\Powerplant.obj");
+
     wstring characterPath(L"..\\Content\\Models\\Soldier\\Soldier.sdkmesh");
     characterMesh.CreateFromSDKMeshFile(device, characterPath.c_str());
 

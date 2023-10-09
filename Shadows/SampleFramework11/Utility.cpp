@@ -21,6 +21,24 @@
 namespace SampleFramework11
 {
 
+std::wstring MakeString(const wchar* format, ...)
+{
+    wchar buffer[1024 * 8] = { 0 };
+    va_list args;
+    va_start(args, format);
+    vswprintf_s(buffer, ArraySize_(buffer), format, args);
+    return std::wstring(buffer);
+}
+
+std::string MakeString(const char* format, ...)
+{
+    char buffer[1024 * 8] = { 0 };
+    va_list args;
+    va_start(args, format);
+    vsprintf_s(buffer, ArraySize_(buffer), format, args);
+    return std::string(buffer);
+}
+
 // Converts from cartesian to barycentric coordinates
 XMFLOAT3 CartesianToBarycentric(float x, float y, const XMFLOAT2& pos1, const XMFLOAT2& pos2, const XMFLOAT2& pos3)
 {

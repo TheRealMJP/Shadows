@@ -31,6 +31,7 @@ struct MeshMaterial
     std::wstring NormalMapName;
     ID3D11ShaderResourceViewPtr DiffuseMap;
     ID3D11ShaderResourceViewPtr NormalMap;
+    std::string Name;
 
     MeshMaterial() : SpecularPower(1.0f), Alpha(1.0f)
     {
@@ -123,6 +124,8 @@ protected:
 
     std::vector<uint8> vertices;
     std::vector<uint8> indices;
+
+    std::string name;
 };
 
 class Model
@@ -147,6 +150,8 @@ public:
     // Serialization
     void WriteToFile(const wchar* path, ID3D11Device* device, ID3D11DeviceContext* context);
     void ReadFromFile(const wchar* path, ID3D11Device* device);
+
+    void SaveAsOBJ(const wchar* path);
 
     // Accessors
     std::vector<MeshMaterial>& Materials() { return meshMaterials; };
