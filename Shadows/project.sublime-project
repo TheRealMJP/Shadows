@@ -2,7 +2,7 @@
     "folders":
     [
         {
-            "path": "/",
+            "path": ".",
             "name": "Local",
             "file_exclude_patterns": ["*.sln", "*.vcxproj", "*.filters", "*.rc", "*.props", "*.user", "*.opensdf", "*.ico"],
             "folder_exclude_patterns": ["Debug", "Release", "bin", "obj", "Properties", "ipch", "x64", "ShaderCache"]
