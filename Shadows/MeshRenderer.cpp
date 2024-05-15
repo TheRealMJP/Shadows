@@ -133,11 +133,18 @@ static Sphere ComputeBoundingSphereFromPoints(const XMFLOAT3* points, uint32 num
     return sphere;
 }
 
-// Calculates the frustum planes given a view * projection matrix
-static void ComputeFrustum(const XMMATRIX& viewProj, Frustum& frustum)
+// Calculates the inverse a camera's view * projection matrices
+static Float4x4 CalculateInverseViewProj(const Camera& camera)
 {
-    XMVECTOR det;
-    XMMATRIX invViewProj = XMMatrixInverse(&det, viewProj);
+    Float4x4 invView = camera.WorldMatrix();
+    Float4x4 invProj = Float4x4::Invert(camera.ProjectionMatrix());
+    return invProj * invView;
+}
+
+// Calculates the frustum planes given a camera
+static void ComputeFrustum(const Camera& camera, Frustum& frustum)
+{
+    XMMATRIX invViewProj = CalculateInverseViewProj(camera).ToSIMD();
 
     // Corners in homogeneous clip space
     XMVECTOR corners[8] =
@@ -263,7 +270,7 @@ static Float4x4 MakeGlobalShadowMatrix(const Camera& camera)
         Float3(-1.0f, -1.0f, 1.0f),
     };
 
-    Float4x4 invViewProj = Float4x4::Invert(camera.ViewProjectionMatrix());
+    Float4x4 invViewProj = CalculateInverseViewProj(camera);
     Float3 frustumCenter = 0.0f;
     for(uint64 i = 0; i < 8; ++i)
     {
@@ -646,7 +653,7 @@ static void DoFrustumTests(const Camera& camera, bool ignoreNearZ, MeshData& mes
     mesh.NumSuccessfulTests = 0;
 
     Frustum frustum;
-    ComputeFrustum(camera.ViewProjectionMatrix().ToSIMD(), frustum);
+    ComputeFrustum(camera, frustum);
 
     for(uint32 i = 0; i < mesh.BoundingSpheres.size(); ++i)
     {
@@ -1157,7 +1164,7 @@ void MeshRenderer::RenderDepthGPU(ID3D11DeviceContext* context, const Camera& ca
     tempViewProjBuffer.ApplyChanges(context);
 
     Frustum frustum;
-    ComputeFrustum(camera.ViewProjectionMatrix().ToSIMD(), frustum);
+    ComputeFrustum(camera, frustum);
     for(uint64 i = 0; i < 6; ++i)
         tempFrustumPlanesBuffer.Data.FrustumPlanes[i] = frustum.Planes[i];
     tempFrustumPlanesBuffer.ApplyChanges(context);
@@ -1408,7 +1415,8 @@ void MeshRenderer::RenderShadowMap(ID3D11DeviceContext* context, const Camera& c
         float prevSplitDist = cascadeIdx == 0 ? MinDistance : CascadeSplits[cascadeIdx - 1];
         float splitDist = CascadeSplits[cascadeIdx];
 
-        Float4x4 invViewProj = Float4x4::Invert(camera.ViewProjectionMatrix());
+        Float4x4 invViewProj = CalculateInverseViewProj(camera);
+
         for(uint32 i = 0; i < 8; ++i)
             frustumCornersWS[i] = Float3::Transform(frustumCornersWS[i], invViewProj);
 
@@ -1560,7 +1568,7 @@ void MeshRenderer::RenderShadowMapGPU(ID3D11DeviceContext* context, const Camera
 
     // Run the cascade setup shader on the GPU
     shadowSetupConstants.Data.GlobalShadowMatrix = Float4x4::Transpose(shadowMatrix);
-    shadowSetupConstants.Data.ViewProjInv = Float4x4::Transpose(Float4x4::Invert(camera.ViewProjectionMatrix()));
+    shadowSetupConstants.Data.ViewProjInv = Float4x4::Transpose(CalculateInverseViewProj(camera));
     shadowSetupConstants.Data.CameraRight = camera.WorldMatrix().Right();
     shadowSetupConstants.Data.CameraNearClip = camera.NearClip();
     shadowSetupConstants.Data.CameraFarClip = camera.FarClip();
