@@ -90,7 +90,6 @@ namespace AppSettings
     ColorSetting LightColor;
     OrientationSetting CharacterOrientation;
     BoolSetting EnableAlbedoMap;
-    BoolSetting VisualizeCascades;
     BoolSetting StabilizeCascades;
     BoolSetting FilterAcrossCascades;
     BoolSetting AutoComputeDepthBounds;
@@ -130,6 +129,15 @@ namespace AppSettings
     FloatSetting BloomBlurSigma;
     FloatSetting KeyValue;
     FloatSetting AdaptationRate;
+    BoolSetting VisualizeCascades;
+    BoolSetting FreezeCascades;
+    BoolSetting DrawCascades;
+    BoolSetting ViewShadowMaps;
+    FloatSetting FrozenCameraRotationX;
+    FloatSetting FrozenCameraRotationY;
+    FloatSetting FrozenCameraPositionX;
+    FloatSetting FrozenCameraPositionY;
+    FloatSetting FrozenCameraPositionZ;
 
     ConstantBuffer<AppSettingsCBuffer> CBuffer;
 
@@ -154,9 +162,6 @@ namespace AppSettings
 
         EnableAlbedoMap.Initialize(tweakBar, "EnableAlbedoMap", "SceneControls", "Enable Albedo Map", "Enables using albedo maps when rendering the scene", true);
         Settings.AddSetting(&EnableAlbedoMap);
-
-        VisualizeCascades.Initialize(tweakBar, "VisualizeCascades", "CascadeControls", "Visualize Cascades", "Colors each cascade a different color to visualize their start and end points", false);
-        Settings.AddSetting(&VisualizeCascades);
 
         StabilizeCascades.Initialize(tweakBar, "StabilizeCascades", "CascadeControls", "Stabilize Cascades", "Keeps consistent sizes for each cascade, and snaps each cascade so that they move in texel-sized increments. Reduces temporal aliasing artifacts, but reduces the effective resolution of the cascades", false);
         Settings.AddSetting(&StabilizeCascades);
@@ -274,6 +279,33 @@ namespace AppSettings
 
         AdaptationRate.Initialize(tweakBar, "AdaptationRate", "PostProcessing", "Adaptation Rate", "Controls how quickly auto-exposure adapts to changes in scene brightness", 0.5000f, 0.0000f, 4.0000f, 0.0100f);
         Settings.AddSetting(&AdaptationRate);
+
+        VisualizeCascades.Initialize(tweakBar, "VisualizeCascades", "Debug", "Visualize Cascades", "Colors each cascade a different color to visualize their start and end points", false);
+        Settings.AddSetting(&VisualizeCascades);
+
+        FreezeCascades.Initialize(tweakBar, "FreezeCascades", "Debug", "Freeze Cascades", "Locks the cascade setup to the current camera position and orientation", false);
+        Settings.AddSetting(&FreezeCascades);
+
+        DrawCascades.Initialize(tweakBar, "DrawCascades", "Debug", "Draw Cascades", "Draws the cascade projections as wireframe draws to visualize them", false);
+        Settings.AddSetting(&DrawCascades);
+
+        ViewShadowMaps.Initialize(tweakBar, "ViewShadowMaps", "Debug", "View Shadow Maps", "Draws the shadow map cascades to the screen so that they can be visualized", false);
+        Settings.AddSetting(&ViewShadowMaps);
+
+        FrozenCameraRotationX.Initialize(tweakBar, "FrozenCameraRotationX", "Debug", "Frozen Camera Rotation X", "Allows rotating the camera while 'Freeze Cascades' is enabled", 0.0000f, -340282300000000000000000000000000000000.0000f, 340282300000000000000000000000000000000.0000f, 0.0100f);
+        Settings.AddSetting(&FrozenCameraRotationX);
+
+        FrozenCameraRotationY.Initialize(tweakBar, "FrozenCameraRotationY", "Debug", "Frozen Camera Rotation Y", "Allows rotating the camera while 'Freeze Cascades' is enabled", 0.0000f, -340282300000000000000000000000000000000.0000f, 340282300000000000000000000000000000000.0000f, 0.0100f);
+        Settings.AddSetting(&FrozenCameraRotationY);
+
+        FrozenCameraPositionX.Initialize(tweakBar, "FrozenCameraPositionX", "Debug", "Frozen Camera Position X", "Allows moving the camera while 'Freeze Cascades' is enabled", 0.0000f, -340282300000000000000000000000000000000.0000f, 340282300000000000000000000000000000000.0000f, 0.0100f);
+        Settings.AddSetting(&FrozenCameraPositionX);
+
+        FrozenCameraPositionY.Initialize(tweakBar, "FrozenCameraPositionY", "Debug", "Frozen Camera Position Y", "Allows moving the camera while 'Freeze Cascades' is enabled", 0.0000f, -340282300000000000000000000000000000000.0000f, 340282300000000000000000000000000000000.0000f, 0.0100f);
+        Settings.AddSetting(&FrozenCameraPositionY);
+
+        FrozenCameraPositionZ.Initialize(tweakBar, "FrozenCameraPositionZ", "Debug", "Frozen Camera Position Z", "Allows moving the camera while 'Freeze Cascades' is enabled", 0.0000f, -340282300000000000000000000000000000000.0000f, 340282300000000000000000000000000000000.0000f, 0.0100f);
+        Settings.AddSetting(&FrozenCameraPositionZ);
 
         CBuffer.Initialize(device);
     }

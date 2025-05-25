@@ -34,6 +34,7 @@ class ShadowsApp : public App
 protected:
 
     FirstPersonCamera camera;
+    FirstPersonCamera cameraForShadows;
 
     Skybox skybox;
 

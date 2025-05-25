@@ -133,7 +133,6 @@ namespace AppSettings
     extern ColorSetting LightColor;
     extern OrientationSetting CharacterOrientation;
     extern BoolSetting EnableAlbedoMap;
-    extern BoolSetting VisualizeCascades;
     extern BoolSetting StabilizeCascades;
     extern BoolSetting FilterAcrossCascades;
     extern BoolSetting AutoComputeDepthBounds;
@@ -173,6 +172,15 @@ namespace AppSettings
     extern FloatSetting BloomBlurSigma;
     extern FloatSetting KeyValue;
     extern FloatSetting AdaptationRate;
+    extern BoolSetting VisualizeCascades;
+    extern BoolSetting FreezeCascades;
+    extern BoolSetting DrawCascades;
+    extern BoolSetting ViewShadowMaps;
+    extern FloatSetting FrozenCameraRotationX;
+    extern FloatSetting FrozenCameraRotationY;
+    extern FloatSetting FrozenCameraPositionX;
+    extern FloatSetting FrozenCameraPositionY;
+    extern FloatSetting FrozenCameraPositionZ;
 
     struct AppSettingsCBuffer
     {

@@ -59,7 +59,8 @@ static const float CharacterScale = 1.0f;
 static const Float3 CharacterPos = Float3(25.0f, 0.0f, 3.0f);
 
 ShadowsApp::ShadowsApp() :  App(L"Shadows", MAKEINTRESOURCEW(IDI_ICON1)),
-                                camera(WindowWidthF / WindowHeightF, XM_PIDIV4 * 0.75f, NearClip, FarClip)
+                                camera(WindowWidthF / WindowHeightF, XM_PIDIV4 * 0.75f, NearClip, FarClip),
+                                cameraForShadows(WindowWidthF / WindowHeightF, XM_PIDIV4 * 0.75f, NearClip, FarClip)
 {
     deviceManager.SetMinFeatureLevel(D3D_FEATURE_LEVEL_11_0);
 }
@@ -211,6 +212,23 @@ void ShadowsApp::Update(const Timer& timer)
                              XMMatrixScaling(scale, scale, scale));
     }
 
+    if (AppSettings::FreezeCascades == false)
+    {
+        cameraForShadows = camera;
+
+        AppSettings::FrozenCameraRotationX.SetValue(cameraForShadows.XRotation());
+        AppSettings::FrozenCameraRotationY.SetValue(cameraForShadows.YRotation());
+        AppSettings::FrozenCameraPositionX.SetValue(cameraForShadows.Position().x);
+        AppSettings::FrozenCameraPositionY.SetValue(cameraForShadows.Position().y);
+        AppSettings::FrozenCameraPositionZ.SetValue(cameraForShadows.Position().z);
+    }
+    else
+    {
+        cameraForShadows.SetXRotation(AppSettings::FrozenCameraRotationX);
+        cameraForShadows.SetYRotation(AppSettings::FrozenCameraRotationY);
+        cameraForShadows.SetPosition(Float3(AppSettings::FrozenCameraPositionX, AppSettings::FrozenCameraPositionY, AppSettings::FrozenCameraPositionZ));
+    }
+
     AppSettings::Update();
 
     meshRenderer.Update();
@@ -244,7 +262,7 @@ void ShadowsApp::Render(const Timer& timer)
     // postProcessor.DrawDepthBuffer(depthBuffer, deviceManager.BackBuffer());
 
     ID3D11RenderTargetView* renderTargets[1] = { deviceManager.BackBuffer() };
-    context->OMSetRenderTargets(1, renderTargets, NULL);
+    context->OMSetRenderTargets(1, renderTargets, nullptr);
 
     D3D11_VIEWPORT vp;
     vp.Width = static_cast<float>(deviceManager.BackBufferWidth());
@@ -255,20 +273,22 @@ void ShadowsApp::Render(const Timer& timer)
     vp.MaxDepth = 1;
     context->RSSetViewports(1, &vp);
 
-    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    if(AppSettings::ViewShadowMaps)
+    {
+        spriteRenderer.Begin(context, SpriteRenderer::Linear);
 
-    /*spriteRenderer.Begin(context, SpriteRenderer::Linear);
+        Float2 drawSize = Float2(256.0f, 256.0f);
+        Float2 shadowMapSize = Float2(float(meshRenderer.ShadowMap().Width), float(meshRenderer.ShadowMap().Height));
+        Float4x4 transform = Float4x4::ScaleMatrix(Float3(drawSize.x / shadowMapSize.x, drawSize.y / shadowMapSize.y, 1.0f));
 
-    ID3D11ShaderResourceView* srv =  meshRenderer.ShadowMap().SRView;
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    srv->GetDesc(&srvDesc);
-    srvDesc.Texture2DArray.ArraySize = 1;
-    ID3D11ShaderResourceViewPtr newSrv;
-    deviceManager.Device()->CreateShaderResourceView(meshRenderer.ShadowMap().Texture, &srvDesc, &newSrv);
+        for(uint32 cascadeIdx = 0; cascadeIdx < NumCascades; ++cascadeIdx)
+        {
+            transform.SetTranslation(Float3(drawSize.x * cascadeIdx, vp.Height - drawSize.y, 0.0f));
+            spriteRenderer.Render(meshRenderer.ShadowMapCascadeSlice(cascadeIdx), transform);
+        }
 
-    spriteRenderer.Render(newSrv, Float4x4());
-
-    spriteRenderer.End();*/
+        spriteRenderer.End();
+    }
 
     RenderHUD();
 }
@@ -315,9 +335,9 @@ void ShadowsApp::RenderMainPass()
         meshRenderer.ReduceDepth(context, depthBuffer.SRView, camera);
 
     if(AppSettings::GPUSceneSubmission)
-        meshRenderer.RenderShadowMapGPU(context, camera, meshWorld, characterWorld);
+        meshRenderer.RenderShadowMapGPU(context, cameraForShadows, meshWorld, characterWorld);
     else
-        meshRenderer.RenderShadowMap(context, camera, meshWorld, characterWorld);
+        meshRenderer.RenderShadowMap(context, cameraForShadows, meshWorld, characterWorld);
 
     renderTargets[0] = colorTarget.RTView;
     context->OMSetRenderTargets(1, renderTargets, ds);
@@ -326,6 +346,9 @@ void ShadowsApp::RenderMainPass()
 
     Float3 lightDir = AppSettings::LightDirection;
     meshRenderer.Render(context, camera, meshWorld, characterWorld);
+
+    if (AppSettings::DrawCascades)
+        meshRenderer.RenderCascadeDebug(context, camera, cameraForShadows);
 
     skybox.RenderSky(context, lightDir, true, camera.ViewMatrix(), camera.ProjectionMatrix());
 }

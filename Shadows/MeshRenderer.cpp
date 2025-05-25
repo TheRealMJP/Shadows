@@ -281,11 +281,7 @@ static Float4x4 MakeGlobalShadowMatrix(const Camera& camera)
     frustumCenter /= 8.0f;
 
     // Pick the up vector to use for the light camera
-    Float3 upDir = camera.Right();
-
-    // This needs to be constant for it to be stable
-    if(AppSettings::StabilizeCascades)
-        upDir = Float3(0.0f, 1.0f, 0.0f);
+    Float3 upDir = Float3(0.0f, 1.0f, 0.0f);
 
     // Create a temporary view matrix for the light
     Float3 lightCameraPos = frustumCenter;
@@ -395,6 +391,9 @@ void MeshRenderer::LoadShaders()
     batchDrawCalls = CompileCSFromFile(device, L"GPUBatch.hlsl", "BatchDrawCalls");
 
     setupCascades = CompileCSFromFile(device, L"SetupShadows.hlsl", "SetupCascades");
+
+    drawFrustumVS = CompileVSFromFile(device, L"DrawFrustum.hlsl", "VSMain");
+    drawFrustumPS = CompilePSFromFile(device, L"DrawFrustum.hlsl", "PSMain");
 }
 
 // Creates shadow map render targets and depth targets
@@ -454,6 +453,15 @@ void MeshRenderer::CreateShadowMaps()
     {
         shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, depthFormat, true, 1, 0, NumCascades);
         varianceShadowMap = RenderTarget2D();
+    }
+
+    for(uint32 cascadeIdx = 0; cascadeIdx < NumCascades; ++cascadeIdx)
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
+        shadowMap.SRView->GetDesc(&srvDesc);
+        srvDesc.Texture2DArray.ArraySize = 1;
+        srvDesc.Texture2DArray.FirstArraySlice = cascadeIdx;
+        device->CreateShaderResourceView(shadowMap.Texture, &srvDesc, &cascadeSlices[cascadeIdx]);
     }
 }
 
@@ -569,6 +577,8 @@ void MeshRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     tempViewProjBuffer.Initialize(device);
     tempFrustumPlanesBuffer.Initialize(device);
 
+    drawFrustumConstants.Initialize(device);
+
     defaultTexture = LoadTexture(device, L"..\\Content\\Textures\\Default.dds");
 
     LoadShaders();
@@ -592,7 +602,7 @@ void MeshRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     for(uint32 i = 0; i < RandomTextureSize * RandomTextureSize; ++i)
         randomValues[i] = static_cast<BYTE>(RandFloat() * 255.0f);
 
-    D3D11_TEXTURE2D_DESC texDesc;
+    D3D11_TEXTURE2D_DESC texDesc = { };
     texDesc.Width = RandomTextureSize;
     texDesc.Height = RandomTextureSize;
     texDesc.Format = DXGI_FORMAT_R8_UNORM;
@@ -605,7 +615,7 @@ void MeshRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     texDesc.SampleDesc.Quality = 0;
     texDesc.CPUAccessFlags = 0;
 
-    D3D11_SUBRESOURCE_DATA initData;
+    D3D11_SUBRESOURCE_DATA initData = { };
     initData.pSysMem = randomValues;
     initData.SysMemPitch = RandomTextureSize;
     initData.SysMemSlicePitch = 0;
@@ -625,7 +635,7 @@ void MeshRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     uint32 dispatchArgsInit[4] = { 1, 1, 1, 0 };
     batchDispatchArgs.Initialize(device, DXGI_FORMAT_R32_TYPELESS, 4, 4, true, false, false, true, dispatchArgsInit);
 
-    D3D11_INPUT_ELEMENT_DESC inputElements[1];
+    D3D11_INPUT_ELEMENT_DESC inputElements[1] = { };
     inputElements[0].AlignedByteOffset = 0;
     inputElements[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
     inputElements[0].InputSlot = 0;
@@ -642,6 +652,41 @@ void MeshRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     cascadeOffsetBuffer.Initialize(device, sizeof(Float4), NumCascades, true);
     cascadeScaleBuffer.Initialize(device, sizeof(Float4), NumCascades, true);
     cascadePlanesBuffer.Initialize(device, sizeof(Float4), NumCascades * 6, true);
+
+    {
+        const uint16 frustumIndices[] =
+        {
+            0, 1,
+            1, 3,
+            3, 2,
+            2, 0,
+
+            0, 4,
+            1, 5,
+            2, 6,
+            3, 7,
+
+            4, 5,
+            5, 7,
+            7, 6,
+            6, 4,
+        };
+
+        D3D11_BUFFER_DESC ibDesc = { };
+        ibDesc.ByteWidth = sizeof(frustumIndices);
+        ibDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        ibDesc.CPUAccessFlags = 0;
+        ibDesc.MiscFlags = 0;
+        ibDesc.StructureByteStride = 0;
+
+        D3D11_SUBRESOURCE_DATA subResData = { };
+        subResData.pSysMem = frustumIndices;
+
+        DXCall(device->CreateBuffer(&ibDesc, &subResData, &frustumLineIB));
+
+        frustumLineIndexCount = ArraySize_(frustumIndices);
+    }
 
     CreateShadowMaps();
 }
@@ -1436,16 +1481,12 @@ void MeshRenderer::RenderShadowMap(ID3D11DeviceContext* context, const Camera& c
             frustumCenter = frustumCenter + frustumCornersWS[i];
         frustumCenter *=  1.0f / 8.0f;
 
-        // Pick the up vector to use for the light camera
-        Float3 upDir = camera.Right();
+        Float3 upDir = Float3(0.0f, 1.0f, 0.0f);
 
         Float3 minExtents;
         Float3 maxExtents;
         if(AppSettings::StabilizeCascades)
         {
-            // This needs to be constant for it to be stable
-            upDir = Float3(0.0f, 1.0f, 0.0f);
-
             // Calculate the radius of a bounding sphere surrounding the frustum corners
             float sphereRadius = 0.0f;
             for(uint32 i = 0; i < 8; ++i)
@@ -1528,6 +1569,7 @@ void MeshRenderer::RenderShadowMap(ID3D11DeviceContext* context, const Camera& c
         texScaleBias.r[2] = XMVectorSet(0.0f,  0.0f, 1.0f, 0.0f);
         texScaleBias.r[3] = XMVectorSet(0.5f,  0.5f, 0.0f, 1.0f);
         XMMATRIX shadowMatrix = shadowCamera.ViewProjectionMatrix().ToSIMD();
+        invCascadeMats[cascadeIdx] = XMMatrixInverse(nullptr, shadowMatrix);
         shadowMatrix = XMMatrixMultiply(shadowMatrix, texScaleBias);
 
         // Store the split distance in terms of view space depth
@@ -1612,5 +1654,53 @@ void MeshRenderer::RenderShadowMapGPU(ID3D11DeviceContext* context, const Camera
 
         if(AppSettings::UseFilterableShadows())
             ConvertToVSM(context, cascadeIdx, Float3(1.0f, 1.0f, 1.0f), Float3(1.0f, 1.0f, 1.0f));
+    }
+}
+
+void MeshRenderer::RenderCascadeDebug(ID3D11DeviceContext* context, const Camera& camera, const Camera& cameraForShadows)
+{
+    PIXEvent event(L"Render Cascade Debug");
+    ProfileBlock block(L"Render Cascade Debug");
+
+    // Set states
+    float blendFactor[4] = {1, 1, 1, 1};
+    context->OMSetBlendState(blendStates.AlphaBlend(), blendFactor, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(depthStencilStates.DepthWriteEnabled(), 0);
+    context->RSSetState(rasterizerStates.NoCull());
+
+    // Set shaders
+    context->DSSetShader(nullptr, nullptr, 0);
+    context->HSSetShader(nullptr, nullptr, 0);
+    context->GSSetShader(nullptr, nullptr, 0);
+    context->VSSetShader(drawFrustumVS , nullptr, 0);
+    context->PSSetShader(drawFrustumPS, nullptr, 0);
+
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    context->IASetInputLayout(nullptr);
+    context->IASetIndexBuffer(frustumLineIB, DXGI_FORMAT_R16_UINT, 0);
+
+    drawFrustumConstants.Data.ViewProjection = Float4x4::Transpose(camera.ViewProjectionMatrix());
+    drawFrustumConstants.Data.InvFrustumViewProj = Float4x4::Transpose(Float4x4::Invert(cameraForShadows.ViewProjectionMatrix()));
+    drawFrustumConstants.Data.Color = Float4(1.0f, 1.0f, 1.0f, 1.0f);
+    drawFrustumConstants.ApplyChanges(context);
+    drawFrustumConstants.SetVS(context, 0);
+    drawFrustumConstants.SetPS(context, 0);
+
+    context->DrawIndexed(frustumLineIndexCount, 0, 0);
+
+    const Float4 CascadeColors[NumCascades] =
+    {
+        Float4(1.0f, 0.0, 0.0f, 1.0f),
+        Float4(0.0f, 1.0f, 0.0f, 1.0f),
+        Float4(0.0f, 0.0f, 1.0f, 1.0f),
+        Float4(1.0f, 1.0f, 0.0, 1.0f)
+    };
+    for(uint32 cascadeIdx = 0; cascadeIdx < NumCascades; ++cascadeIdx)
+    {
+        drawFrustumConstants.Data.InvFrustumViewProj = Float4x4::Transpose(invCascadeMats[cascadeIdx]);
+        drawFrustumConstants.Data.Color = CascadeColors[cascadeIdx];
+        drawFrustumConstants.ApplyChanges(context);
+
+        context->DrawIndexed(frustumLineIndexCount, 0, 0);
     }
 }

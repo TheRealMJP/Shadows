@@ -173,11 +173,6 @@ public class Settings
 
     public class CascadeControls
     {
-        [DisplayName("Visualize Cascades")]
-        [HelpText("Colors each cascade a different color to visualize their start and end points")]
-        [UseAsShaderConstant(false)]
-        bool VisualizeCascades = false;
-
         [DisplayName("Stabilize Cascades")]
         [HelpText("Keeps consistent sizes for each cascade, and snaps each cascade so that they " +
                   "move in texel-sized increments. Reduces temporal aliasing artifacts, but " +
@@ -422,5 +417,53 @@ public class Settings
         [StepSize(0.01f)]
         [HelpText("Controls how quickly auto-exposure adapts to changes in scene brightness")]
         float AdaptationRate = 0.5f;
+    }
+
+    public class Debug
+    {
+        [DisplayName("Visualize Cascades")]
+        [HelpText("Colors each cascade a different color to visualize their start and end points")]
+        [UseAsShaderConstant(false)]
+        bool VisualizeCascades = false;
+
+        [DisplayName("Freeze Cascades")]
+        [HelpText("Locks the cascade setup to the current camera position and orientation")]
+        [UseAsShaderConstant(false)]
+        bool FreezeCascades = false;
+
+        [DisplayName("Draw Cascades")]
+        [HelpText("Draws the cascade projections as wireframe draws to visualize them")]
+        [UseAsShaderConstant(false)]
+        bool DrawCascades = false;
+
+        [DisplayName("View Shadow Maps")]
+        [HelpText("Draws the shadow map cascades to the screen so that they can be visualized")]
+        [UseAsShaderConstant(false)]
+        bool ViewShadowMaps = false;
+
+        [DisplayName("Frozen Camera Rotation X")]
+        [HelpText("Allows rotating the camera while 'Freeze Cascades' is enabled")]
+        [UseAsShaderConstant(false)]
+        float FrozenCameraRotationX = 0.0f;
+
+        [DisplayName("Frozen Camera Rotation Y")]
+        [HelpText("Allows rotating the camera while 'Freeze Cascades' is enabled")]
+        [UseAsShaderConstant(false)]
+        float FrozenCameraRotationY = 0.0f;
+
+        [DisplayName("Frozen Camera Position X")]
+        [HelpText("Allows moving the camera while 'Freeze Cascades' is enabled")]
+        [UseAsShaderConstant(false)]
+        float FrozenCameraPositionX = 0.0f;
+
+         [DisplayName("Frozen Camera Position Y")]
+        [HelpText("Allows moving the camera while 'Freeze Cascades' is enabled")]
+        [UseAsShaderConstant(false)]
+        float FrozenCameraPositionY = 0.0f;
+
+        [DisplayName("Frozen Camera Position Z")]
+        [HelpText("Allows moving the camera while 'Freeze Cascades' is enabled")]
+        [UseAsShaderConstant(false)]
+        float FrozenCameraPositionZ = 0.0f;
     }
 };

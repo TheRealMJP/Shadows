@@ -86,6 +86,8 @@ public:
     void RenderShadowMapGPU(ID3D11DeviceContext* context, const Camera& camera,
                             const Float4x4& world, const Float4x4& characterWorld);
 
+    void RenderCascadeDebug(ID3D11DeviceContext* context, const Camera& camera, const Camera& cameraForShadows);
+
     void Update();
 
     void CreateReductionTargets(uint32 width, uint32 height);
@@ -94,6 +96,11 @@ public:
                      const Camera& camera);
 
     DepthStencilBuffer& ShadowMap() { return shadowMap; }
+    ID3D11ShaderResourceView* ShadowMapCascadeSlice(uint32 cascadeIdx)
+    {
+        Assert_(cascadeIdx < NumCascades);
+        return cascadeSlices[cascadeIdx];
+    }
 
 protected:
 
@@ -133,6 +140,7 @@ protected:
     DepthStencilBuffer shadowMap;
     RenderTarget2D  varianceShadowMap;
     RenderTarget2D tempVSM;
+    ID3D11ShaderResourceViewPtr cascadeSlices[NumCascades];
 
     ID3D11ShaderResourceViewPtr randomRotations;
 
@@ -174,6 +182,12 @@ protected:
     StructuredBuffer cascadeOffsetBuffer;
     StructuredBuffer cascadeScaleBuffer;
     StructuredBuffer cascadePlanesBuffer;
+
+    VertexShaderPtr drawFrustumVS;
+    PixelShaderPtr drawFrustumPS;
+    ID3D11BufferPtr frustumLineIB;
+    uint32 frustumLineIndexCount = 0;
+    Float4x4 invCascadeMats[NumCascades];
 
     // Constant buffers
     struct DepthOnlyConstants
@@ -234,6 +248,13 @@ protected:
         Float4 FrustumPlanes[6];
     };
 
+    struct DrawFrustumConstants
+    {
+        Float4x4 ViewProjection;
+        Float4x4 InvFrustumViewProj;
+        Float4 Color;
+    };
+
     ConstantBuffer<DepthOnlyConstants> depthOnlyConstants;
     ConstantBuffer<MeshVSConstants> meshVSConstants;
     ConstantBuffer<MeshPSConstants> meshPSConstants;
@@ -244,4 +265,6 @@ protected:
 
     ConstantBuffer<Float4x4> tempViewProjBuffer;
     ConstantBuffer<FrustumConstants> tempFrustumPlanesBuffer;
+
+    ConstantBuffer<DrawFrustumConstants> drawFrustumConstants;
 };
