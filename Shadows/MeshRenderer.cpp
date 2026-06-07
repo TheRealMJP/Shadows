@@ -411,7 +411,7 @@ void MeshRenderer::CreateShadowMaps()
     if(AppSettings::UseFilterableShadows())
     {
         uint32 msaaSamples = AppSettings::MSAASamples();
-        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, depthFormat, true, msaaSamples, 0, 1);
+        shadowMap.Initialize(device, ShadowMapSize, ShadowMapSize, depthFormat, true, msaaSamples, 0, NumCascades);
 
         DXGI_FORMAT smFmt;
         if(AppSettings::ShadowMode == ShadowMode::EVSM4)
@@ -459,8 +459,16 @@ void MeshRenderer::CreateShadowMaps()
     {
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
         shadowMap.SRView->GetDesc(&srvDesc);
-        srvDesc.Texture2DArray.ArraySize = 1;
-        srvDesc.Texture2DArray.FirstArraySlice = cascadeIdx;
+        if (srvDesc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY)
+        {
+            srvDesc.Texture2DMSArray.ArraySize = 1;
+            srvDesc.Texture2DMSArray.FirstArraySlice = cascadeIdx;
+        }
+        else
+        {
+            srvDesc.Texture2DArray.ArraySize = 1;
+            srvDesc.Texture2DArray.FirstArraySlice = cascadeIdx;
+        }
         device->CreateShaderResourceView(shadowMap.Texture, &srvDesc, &cascadeSlices[cascadeIdx]);
     }
 }
@@ -976,7 +984,7 @@ void MeshRenderer::ConvertToVSM(ID3D11DeviceContext* context, uint32 cascadeIdx,
     ID3D11RenderTargetView* rtvs[1] = { varianceShadowMap.RTVArraySlices[cascadeIdx] };
     context->OMSetRenderTargets(1, rtvs, nullptr);
 
-    ID3D11ShaderResourceView* srvs[1] = { shadowMap.SRView };
+    ID3D11ShaderResourceView* srvs[1] = { cascadeSlices[cascadeIdx] };
     context->PSSetShaderResources(0, 1, srvs);
 
     context->Draw(3, 0);
@@ -1437,9 +1445,7 @@ void MeshRenderer::RenderShadowMap(ID3D11DeviceContext* context, const Camera& c
         context->RSSetViewports(1, &viewport);
 
         // Set the shadow map as the depth target
-        ID3D11DepthStencilView* dsv = shadowMap.DSView;
-        if(AppSettings::UseFilterableShadows() == false)
-            dsv = shadowMap.ArraySlices[cascadeIdx];
+        ID3D11DepthStencilView* dsv = shadowMap.ArraySlices[cascadeIdx];
         ID3D11RenderTargetView* nullRenderTargets[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = { nullptr };
         context->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, nullRenderTargets, dsv);
         context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);

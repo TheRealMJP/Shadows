@@ -284,11 +284,20 @@ void DepthStencilBuffer::Initialize(ID3D11Device* device,
         }
         else
         {
-            srvDesc.ViewDimension = multiSamples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY : D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-            srvDesc.Texture2DArray.ArraySize = arraySize;
-            srvDesc.Texture2DArray.FirstArraySlice = 0;
-            srvDesc.Texture2DArray.MipLevels = 1;
-            srvDesc.Texture2DArray.MostDetailedMip = 0;
+            if (multiSamples > 1)
+            {
+                srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+                srvDesc.Texture2DMSArray.FirstArraySlice = 0;
+                srvDesc.Texture2DMSArray.ArraySize = arraySize;
+            }
+            else
+            {
+                srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+                srvDesc.Texture2DArray.MostDetailedMip = 0;
+                srvDesc.Texture2DArray.MipLevels = 1;
+                srvDesc.Texture2DArray.FirstArraySlice = 0;
+                srvDesc.Texture2DArray.ArraySize = arraySize;
+            }
         }
 
         DXCall(device->CreateShaderResourceView(Texture, &srvDesc, &SRView));

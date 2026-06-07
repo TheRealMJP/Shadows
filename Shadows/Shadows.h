@@ -28,6 +28,13 @@
 
 using namespace SampleFramework11;
 
+struct DrawCascadesConstants
+{
+    Uint2 RTSize;
+    Uint2 DrawSize;
+    float DrawPixelToShadowTexelScale;
+};
+
 class ShadowsApp : public App
 {
 
@@ -47,6 +54,10 @@ protected:
     Model models[uint64(Scene::NumValues)];
     Model characterMesh;
     MeshRenderer meshRenderer;
+
+    VertexShaderPtr drawCascadesVS;
+    PixelShaderPtr drawCascadesPS[2];
+    ConstantBuffer<DrawCascadesConstants> drawCascadesCB;
 
     virtual void Initialize() override;
     virtual void Render(const Timer& timer) override;

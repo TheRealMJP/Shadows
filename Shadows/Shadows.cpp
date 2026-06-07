@@ -128,6 +128,19 @@ void ShadowsApp::Initialize()
 
     // Init the post processor
     postProcessor.Initialize(device);
+
+    drawCascadesVS = CompileVSFromFile(device, L"DrawCascades.hlsl", "VSMain", "vs_5_0");
+    {
+        CompileOptions opts;
+        opts.Add("MSAA_", 0);
+        drawCascadesPS[0] = CompilePSFromFile(device, L"DrawCascades.hlsl", "PSMain", "ps_5_0", opts);
+
+        opts.Reset();
+        opts.Add("MSAA_", 1);
+        drawCascadesPS[1] = CompilePSFromFile(device, L"DrawCascades.hlsl", "PSMain", "ps_5_0", opts);
+    }
+
+    drawCascadesCB.Initialize(device, false);
 }
 
 // Creates all required render targets
@@ -264,31 +277,52 @@ void ShadowsApp::Render(const Timer& timer)
     ID3D11RenderTargetView* renderTargets[1] = { deviceManager.BackBuffer() };
     context->OMSetRenderTargets(1, renderTargets, nullptr);
 
-    D3D11_VIEWPORT vp;
-    vp.Width = static_cast<float>(deviceManager.BackBufferWidth());
-    vp.Height = static_cast<float>(deviceManager.BackBufferHeight());
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    vp.MinDepth = 0;
-    vp.MaxDepth = 1;
-    context->RSSetViewports(1, &vp);
-
     if(AppSettings::ViewShadowMaps)
     {
-        spriteRenderer.Begin(context, SpriteRenderer::Linear);
+        PIXEvent event(L"View Shadow Maps");
 
-        Float2 drawSize = Float2(256.0f, 256.0f);
-        Float2 shadowMapSize = Float2(float(meshRenderer.ShadowMap().Width), float(meshRenderer.ShadowMap().Height));
-        Float4x4 transform = Float4x4::ScaleMatrix(Float3(drawSize.x / shadowMapSize.x, drawSize.y / shadowMapSize.y, 1.0f));
+        const uint32 drawSize = 256;
 
-        for(uint32 cascadeIdx = 0; cascadeIdx < NumCascades; ++cascadeIdx)
-        {
-            transform.SetTranslation(Float3(drawSize.x * cascadeIdx, vp.Height - drawSize.y, 0.0f));
-            spriteRenderer.Render(meshRenderer.ShadowMapCascadeSlice(cascadeIdx), transform);
-        }
+        D3D11_VIEWPORT vp = { };
+        vp.Width = drawSize * NumCascades;
+        vp.Height = drawSize;
+        vp.TopLeftX = 0.0f;
+        vp.TopLeftY = float(deviceManager.BackBufferHeight() - drawSize);
+        vp.MinDepth = 0;
+        vp.MaxDepth = 1;
+        context->RSSetViewports(1, &vp);
 
-        spriteRenderer.End();
+        drawCascadesCB.Data.RTSize.x = deviceManager.BackBufferWidth();
+        drawCascadesCB.Data.RTSize.y = deviceManager.BackBufferHeight();
+        drawCascadesCB.Data.DrawSize.x = 256;
+        drawCascadesCB.Data.DrawSize.y = 256;
+        drawCascadesCB.Data.DrawPixelToShadowTexelScale = float(meshRenderer.ShadowMap().Width) / drawSize;
+        drawCascadesCB.ApplyChanges(context);
+        drawCascadesCB.SetVS(context, 0);
+        drawCascadesCB.SetPS(context, 0);
+
+        float blendFactor[4] = {1, 1, 1, 1};
+        context->OMSetBlendState(blendStates.BlendDisabled(), blendFactor, 0xFFFFFFFF);
+        context->RSSetState(rasterizerStates.NoCull());
+        context->OMSetDepthStencilState(depthStencilStates.DepthDisabled(), 0);
+        ID3D11Buffer* vbs[1] = { nullptr };
+        uint32 strides[1] = { 0 };
+        uint32 offsets[1] = { 0 };
+        context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+        context->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0);
+        context->IASetInputLayout(nullptr);
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        ID3D11ShaderResourceView* srvs[1] = { meshRenderer.ShadowMap().SRView };
+        context->PSSetShaderResources(0, 1, srvs);
+
+        context->VSSetShader(drawCascadesVS, nullptr, 0);
+        context->PSSetShader(AppSettings::ShadowMSAA != ShadowMSAA::MSAANone ? drawCascadesPS[1] : drawCascadesPS[0], nullptr, 0);
+
+        context->Draw(3, 0);
     }
+
+    SetViewport(context, deviceManager.BackBufferWidth(), deviceManager.BackBufferHeight());
 
     RenderHUD();
 }
