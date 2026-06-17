@@ -180,11 +180,7 @@ void SetupCascades(in uint3 GroupID : SV_GroupID, in uint3 GroupThreadID : SV_Gr
     frustumCenter /= 8.0f;
 
     // Pick the up vector to use for the light camera
-    float3 upDir = CameraRight;
-
-    // This needs to be constant it to be stable
-    if(StabilizeCascades)
-        upDir = float3(0.0f, 1.0f, 0.0f);
+    float3 upDir = float3(0.0f, 1.0f, 0.0f);
 
     // Create a temporary view matrix for the light
     float3 lightCameraPos = frustumCenter;
